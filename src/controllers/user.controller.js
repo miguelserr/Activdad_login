@@ -59,10 +59,21 @@ const getAvatar = async (req, res) => {
     }
     return res.sendFile(avatarPath);
   } catch (error) {
-    return errorResponse(res, error, "Error al obtener la imagen de usuario.", 500);
+    return errorResponse(res, error, "Error al obtener la imagen.", 500);
   }
 };
 
+const updatedAvatar = async (req, res) => {
+  try {
+
+    const user = await userService.updatedAvatar(req.params.id, req.file ? req.file.filename : null);
+
+    return successResponse(res, user, "actualizado correctamente.", 200);
+  } catch (error) {
+    console.error(error);
+    return errorResponse(res, error, "Error al actaulizar la imagen.", 500);
+  }
+}
 
 module.exports = {
   created,
@@ -70,5 +81,6 @@ module.exports = {
   getAll,
   getById,
   deleted,
-  getAvatar
+  getAvatar,
+  updatedAvatar
 }

@@ -1,23 +1,23 @@
-const Like = require('../models/like.model');
+const Comment = require('../models/comment.model');
 const User = require('../models/user.model');
 
 const created = async (data) => {
-    await Like.sync();
-    const like = await Like.create(data);
-    return like;
+    await Comment.sync();
+    const comment = await Comment.create(data);
+    return comment;
 };
 const updated = async (id, data) => {
-    const like = await Like.update(data, { where: { id } });
-    return like;
+    const comment = await Comment.update(data, { where: { id } });
+    return comment;
 }
 const getAll = async () => {
-    return await Like.findAll();
+    return await Comment.findAll();
 };
 const getById = async (id) => {
-    return await Like.findOne({ where: { id } });
+    return await Comment.findOne({ where: { id } });
 };
 const getByPost = async (post) => {
-    return await Like.findOne({
+    return await Comment.findOne({
         where: { post_id: post },
         include: {
             model: User, as: "Author",
@@ -28,7 +28,7 @@ const getByPost = async (post) => {
     });
 };
 const deleted = async (id) => {
-    return await Like.destroy({ where: { id } });
+    return await Comment.destroy({ where: { id } });
 };
 module.exports = {
     created,

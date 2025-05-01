@@ -1,10 +1,10 @@
 const { successResponse, errorResponse } = require("../utils/response");
-const likeService = require("../services/like.service");
+const commentService = require("../services/comment.service");
 
 const created = async (req, res) => {
     try {
-        const like = await likeService.created(req.body);
-        return successResponse(res, like, "creado exitosamente.", 201);
+        const comment = await commentService.created(req.body);
+        return successResponse(res, comment, "creado exitosamente.", 201);
     } catch (error) {
         console.error(error);
         return errorResponse(res, error, "Error al crear.", 500);
@@ -13,8 +13,8 @@ const created = async (req, res) => {
 
 const updated = async (req, res, next) => {
     try {
-        const like = await likeService.updated(req.params.id, req.body)
-        return successResponse(res, like, "actualizado exitosamente.", 200);
+        const comment = await commentService.updated(req.params.id, req.body)
+        return successResponse(res, comment, "actualizado exitosamente.", 200);
     } catch (error) {
         return errorResponse(res, error, "Error al actualizar.", 500);
     }
@@ -22,8 +22,8 @@ const updated = async (req, res, next) => {
 
 const getAll = async (req, res) => {
     try {
-        const likes = await likeService.getAll();
-        return successResponse(res, likes, "Consulta exitosa.", 200);
+        const comments = await commentService.getAll();
+        return successResponse(res, comments, "Consulta exitosa.", 200);
 
     } catch (error) {
         console.error(error);
@@ -33,9 +33,9 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
     try {
-        const like = await likeService.getById(req.params.id);
-        if (!like) return errorResponse(res, error, "Registro no encontrado.", 404);
-        return successResponse(res, like, "Consulta exitosa.", 200);
+        const comment = await commentService.getById(req.params.id);
+        if (!comment) return errorResponse(res, error, "Registro no encontrado.", 404);
+        return successResponse(res, comment, "Consulta exitosa.", 200);
     } catch (error) {
         console.error(error);
         return errorResponse(res, error, "Error al obtener.", 500);
@@ -44,9 +44,9 @@ const getById = async (req, res) => {
 
 const getByPost = async (req, res) => {
     try {
-        const like = await likeService.getByPost(req.params.post);
-        if (!like) return errorResponse(res, error, "Registro no encontrado.", 404);
-        return successResponse(res, like, "Consulta exitosa.", 200);
+        const comment = await commentService.getByPost(req.params.post);
+        if (!comment) return errorResponse(res, error, "Registro no encontrado.", 404);
+        return successResponse(res, comment, "Consulta exitosa.", 200);
     } catch (error) {
         console.error(error);
         return errorResponse(res, error, "Error al obtener.", 500);
@@ -55,7 +55,7 @@ const getByPost = async (req, res) => {
 
 const deleted = async (req, res) => {
     try {
-        await likeService.deleted(req.params.id);
+        await commentService.deleted(req.params.id);
         return successResponse(res, req.params.id, "eliminado correctamente.", 200);
     } catch (error) {
         console.error(error);

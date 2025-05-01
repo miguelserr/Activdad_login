@@ -62,7 +62,15 @@ const getImage = async (req, res) => {
         return errorResponse(res, error, "Error al obtener la imagen.", 500);
     }
 };
-
+const updatedImage = async (req, res) => {
+    try {
+        const post = await postService.updatedImage(req.params.id, req.file ? req.file.filename : null);
+        return successResponse(res, post, "actualizado correctamente.", 200);
+    } catch (error) {
+        console.error(error);
+        return errorResponse(res, error, "Error al actaulizar la imagen.", 500);
+    }
+}
 
 module.exports = {
     created,
@@ -70,5 +78,6 @@ module.exports = {
     getAll,
     getById,
     deleted,
-    getImage
+    getImage,
+    updatedImage
 }

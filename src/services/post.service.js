@@ -13,7 +13,7 @@ const updated = async (id, data) => {
     return post;
 }
 const getAll = async () => {
-    return await Post.findAll({ include: { model: User, as: "Author", attributes: { exclude: ['role_id', 'createdAt', 'updatedAt'] } }, attributes: { exclude: ['author_id'] } });
+    return await Post.findAll({ include: { model: User, as: "Author", attributes: { exclude: ['role_id', 'createdAt', 'updatedAt'], } }, attributes: { exclude: ['author_id'] } });
 };
 const getById = async (id) => {
     return await Post.findOne({
@@ -41,11 +41,28 @@ const getImage = async (id) => {
     }
     return postPath;
 };
+const updatedImage = async (id, image) => {
+    const post = await Post.findByPk(id);
+
+    if (!post) {
+        return;
+    }
+    // Borrar avatar anterior si existe
+    if (post.image) {
+        const oldPath = path.join(__dirname, '../..', 'uploads', 'images', 'users', 'avatar', post.image);
+        if (fs.existsSync(oldPath)) {
+            fs.unlinkSync(oldPath); // Elimina el archivo anterior
+        }
+    }
+    post.image = image;
+    return await post.save();
+}
 module.exports = {
     created,
     updated,
     getAll,
     getById,
     deleted,
-    getImage
+    getImage,
+    updatedImage
 };
