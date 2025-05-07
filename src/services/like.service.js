@@ -1,5 +1,6 @@
 const Like = require('../models/like.model');
 const User = require('../models/user.model');
+const { throwIfNotFound } = require('../utils/db');
 
 const created = async (data) => {
     await Like.sync();
@@ -11,13 +12,20 @@ const updated = async (id, data) => {
     return like;
 }
 const getAll = async () => {
-    return await Like.findAll();
+    const like = await Like.findAll();
+    if (!like) {
+        const error = new Error("Registros no encontrados.");
+        error.status = 404;
+        throw error;
+    }
+    return throwIfNotFound(like);
 };
 const getById = async (id) => {
-    return await Like.findOne({ where: { id } });
+    const like = await Like.findOne({ where: { id } });
+    return throwIfNotFound(like);
 };
 const getByPost = async (post) => {
-    return await Like.findOne({
+    const like = await Like.findOne({
         where: { post_id: post },
         include: {
             model: User, as: "Author",
@@ -26,10 +34,12 @@ const getByPost = async (post) => {
             }
         }
     });
+    return throwIfNotFound(like);
 };
 const deleted = async (id) => {
     return await Like.destroy({ where: { id } });
 };
+
 module.exports = {
     created,
     updated,

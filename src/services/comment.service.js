@@ -1,5 +1,6 @@
 const Comment = require('../models/comment.model');
 const User = require('../models/user.model');
+const { throwIfNotFound } = require('../utils/db');
 
 const created = async (data) => {
     await Comment.sync();
@@ -11,13 +12,15 @@ const updated = async (id, data) => {
     return comment;
 }
 const getAll = async () => {
-    return await Comment.findAll();
+    const comments = await Comment.findAll();
+    return throwIfNotFound(comments);
 };
 const getById = async (id) => {
-    return await Comment.findOne({ where: { id } });
+    const comment = await Comment.findOne({ where: { id } });
+    return throwIfNotFound(comment);
 };
 const getByPost = async (post) => {
-    return await Comment.findOne({
+    const comment = await Comment.findOne({
         where: { post_id: post },
         include: {
             model: User, as: "Author",
@@ -26,6 +29,7 @@ const getByPost = async (post) => {
             }
         }
     });
+    return throwIfNotFound(comment);
 };
 const deleted = async (id) => {
     return await Comment.destroy({ where: { id } });

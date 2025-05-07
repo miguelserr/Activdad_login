@@ -1,6 +1,8 @@
 const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const Auth = require('../models/auth.model');
+const error = require("../middlewares/error");
+const { throwIfNotFound } = require('../utils/db');
 const bcrypt = require("bcrypt");
 const path = require("path");
 const fs = require("fs");
@@ -29,15 +31,29 @@ const updated = async (id, data) => {
     await Auth.update(data, { where: { id } });
     return user;
 }
-const getAll = async () => {
-    return await User.findAll({ include: { model: Role, as: "Role", attributes: { exclude: ['createdAt', 'updatedAt'] } }, attributes: { exclude: ['role_id'] } });
+const getAll = async (page = 1, limit = 10) => {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await User.findAndCountAll({ limit, offset, include: { model: Role, as: "Role", attributes: { exclude: ['createdAt', 'updatedAt'] } }, attributes: { exclude: ['role_id'] } });
+    const totalPages = Math.ceil(count / limit);
+    if (page > totalPages) {
+        throw error(`Page ${page} exceeds total pages (${totalPages})`, 404);
+    }
+    const users = {
+        totalItems: count,
+        totalPages: totalPages,
+        currentPage: page,
+        users: rows,
+    };
+
+    return throwIfNotFound(users)
 };
 const getById = async (id) => {
-    return await User.findOne({
+    const user = await User.findOne({
         where: { id },
         include: { model: Role, as: "Role", attributes: { exclude: ['createdAt', 'updatedAt'] } },
         attributes: { exclude: ['role_id'] }
     });
+    return throwIfNotFound(user)
 };
 const deleted = async (id) => {
     return await User.destroy({ where: { id } });

@@ -17,4 +17,5 @@ module.exports = {
     port: process.env.MYSQL_PORT || 3306,
     dialect: process.env.MYSQL_DIALECT || "mysql",
   },
+  apiKey: process.env.API_KEY,
 };

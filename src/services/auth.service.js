@@ -24,6 +24,27 @@ async function login({ email, password }) {
     }
 }
 
+const checkStatus = async (data, token) => {
+    const { email } = data.dataValues;
+    if (!data) {
+        throw new Error("Invalid token payload");
+    }
+    const user = await User.findOne({
+        where: { email }, include: {
+            model: Role, as: "Role",
+            attributes: {
+                exclude: ['createdAt', 'updatedAt']
+            }
+        },
+        attributes: { exclude: ['role_id', 'createdAt', 'updatedAt'] }
+    });
+    var resp = {
+        token: token,
+        user: user,
+    };
+    return resp;
+};
+
 const created = async (data) => {
     await Auth.sync();
     password = await bcrypt.hash(data.password.toString(), 10);
@@ -58,7 +79,7 @@ const validatePassword = (pass1, pass2) => {
 };
 
 const getToken = (data, user) => {
-    data.role_id = user.role_id;
+    data.role = user.Role.name;
     var resp = {
         token: auth.assignToken({ ...data }),
         user: user,
@@ -70,4 +91,5 @@ module.exports = {
     created,
     login,
     changePassword,
+    checkStatus
 };

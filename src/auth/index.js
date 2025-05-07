@@ -22,13 +22,13 @@ function verifyToken(token) {
 }
 
 const checkToken = {
-    confirmToken: function (req, id) {
+    confirmToken: function (req, id, requiredRole) {
         const { id: userId, role: role } = decodeHeader(req);
 
-        const isAdmin = (role.name === "admin");
+        const isAdmin = (role === "admin");
         const isOwner = (userId === id);
 
-        if (!isOwner && !isAdmin) {
+        if (requiredRole === "admin" && !isOwner && !isAdmin) {
             throw error("You don't have privileges to do this operation", 401);
         }
     }
@@ -49,6 +49,7 @@ function decodeHeader(req) {
     const decode = verifyToken(token);
 
     req.user = decode;
+    req.token = token;
 
     return decode;
 }
