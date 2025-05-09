@@ -28,7 +28,9 @@ const created = async (data) => {
 };
 const updated = async (id, data) => {
     const user = await User.update(data, { where: { id } });
-    await Auth.update(data, { where: { id } });
+    await Auth.update({
+        email: data.email,
+    }, { where: { id } });
     return user;
 }
 const getAll = async (page = 1, limit = 10) => {
@@ -61,7 +63,7 @@ const deleted = async (id) => {
 const getAvatar = async (id) => {
     const user = await User.findOne({ where: { id } });
     if (!user.avatar) {
-        return ""
+        return throwIfNotFound(user);
     }
 
     const avatarPath = path.join(__dirname, '../..', 'uploads', 'images', 'users', 'avatar', user.avatar);
@@ -77,10 +79,10 @@ const updatedAvatar = async (id, avatar) => {
     const user = await User.findByPk(id);
 
     if (!user) {
-        return;
+        return throwIfNotFound(user);
     }
     // Borrar avatar anterior si existe
-    if (user.avatar) {
+    if (user.avatar && user.avatar != 'avatar-user.png') {
         const oldPath = path.join(__dirname, '../..', 'uploads', 'images', 'users', 'avatar', user.avatar);
         if (fs.existsSync(oldPath)) {
             fs.unlinkSync(oldPath); // Elimina el archivo anterior

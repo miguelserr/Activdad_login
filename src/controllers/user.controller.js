@@ -57,7 +57,7 @@ const getAvatar = async (req, res, next) => {
   try {
     const avatarPath = await userService.getAvatar(req.params.id);
     if (avatarPath === "") {
-      errorResponse(res, error, "imagen no encontrado.", 404);
+      errorResponse(res, avatarPath, "imagen no encontrado.", 404);
     }
     return res.sendFile(avatarPath);
   } catch (error) {

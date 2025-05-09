@@ -6,3 +6,7 @@ const throwIfNotFound = (data, message = "Registros no encontrados.") => {
     }
     return data;
 };
+
+module.exports = {
+    throwIfNotFound
+};
