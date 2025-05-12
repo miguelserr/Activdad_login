@@ -1,14 +1,15 @@
-const express = require("express");
-const protectedRoute = require("../middlewares/protected.middleware");
-const apiKeyMiddleware = require('../middlewares/apiKey.middlewar');
+const express = require("express")
+const protectedRoute = require("../middlewares/protected.middleware")
+const apiKeyMiddleware = require("../middlewares/apiKey.middlewar")
 
-const controller = require("../controllers/auth.controller");
+const controller = require("../controllers/auth.controller")
 
-const router = express.Router();
+const router = express.Router()
 
-router.post("/login", controller.login);
-router.post("/", apiKeyMiddleware, controller.create);
-router.get("/check-status", protectedRoute(), controller.checkStatus);
-router.put("/:id", protectedRoute(), controller.changePassword);
+router.get("/login", controller.getLoginPage)
+router.post("/login", controller.login)
+router.post("/", apiKeyMiddleware, controller.create)
+router.get("/check-status", protectedRoute(), controller.checkStatus)
+router.put("/:id", protectedRoute(), controller.changePassword)
 
-module.exports = router;
+module.exports = router

@@ -1,0 +1,36 @@
+<script>
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("message");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.data && data.data.token) {
+        localStorage.setItem("token", data.data.token); 
+        msg.textContent = "✅ Login exitoso. Redirigiendo...";
+        msg.style.color = "green";
+        setTimeout(() => {
+          window.location.href = "home.html";
+        }, 1500);
+      } else {
+        msg.textContent = data.message || "❌ Credenciales inválidas";
+        msg.style.color = "red";
+      }
+    } catch (error) {
+      msg.textContent = "❌ Error de conexión con el servidor";
+      msg.style.color = "red";
+    }
+  });
+</script>
