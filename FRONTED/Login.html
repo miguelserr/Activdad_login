@@ -1,36 +1,369 @@
-<script>
-  const form = document.getElementById("loginForm");
-  const msg = document.getElementById("message");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión | Mi Aplicación</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom CSS -->
+  <style>
+    body {
+      background-color: #f8f9fa;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+    
+    .form-signin {
+      max-width: 420px;
+      padding: 15px;
+      margin: auto;
+    }
+    
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    
+    .card-body {
+      padding: 2rem;
+    }
+    
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-floating {
+      margin-bottom: 1rem;
+    }
+    
+    .form-control:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      border: none;
+      padding: 0.75rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    #message {
+      height: 24px;
+      transition: all 0.3s ease;
+    }
+    
+    .spinner-border {
+      display: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="form-signin">
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-user-circle login-icon"></i>
+        <h1 class="h3 mb-3 fw-normal">Iniciar Sesión</h1>
+      </div>
+      <div class="card-body">
+        <form id="loginForm">
+          <div class="form-floating">
+            <input type="email" class="form-control" id="email" placeholder="nombre@ejemplo.com" required>
+            <label for="email">Correo electrónico</label>
+          </div>
+          
+          <div class="form-floating">
+            <input type="password" class="form-control" id="password" placeholder="Contraseña" required>
+            <label for="password">Contraseña</label>
+          </div>
+          
+          <div class="form-check text-start my-3">
+            <input class="form-check-input" type="checkbox" value="remember-me" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+              Recordarme
+            </label>
+          </div>
+          
+          <button class="w-100 btn btn-lg btn-primary" type="submit">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinner"></span>
+            <span id="buttonText">Iniciar sesión</span>
+          </button>
+          
+          <div id="message" class="text-center mt-3"></div>
+        </form>
+      </div>
+    </div>
+    
+    <p class="mt-5 mb-3 text-body-secondary text-center">&copy; 2025</p>
+  </main>
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+ 
+  <script>
+ 
+    const AuthService = {
+      apiUrl: 'http://localhost:3000/api/auth',
+      tokenKey: 'token',
+      userKey: 'user',
+      
+      async login(credentials) {
+        try {
+          const response = await fetch(`${this.apiUrl}/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(credentials),
+          });
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+          const data = await response.json();
+          
+          if (response.ok && data.data && data.data.token) {
+            this.setToken(data.data.token);
+            this.setUser(data.data.user);
+            return { success: true, data: data.data };
+          } else {
+            return { 
+              success: false, 
+              message: data.message || 'Credenciales inválidas' 
+            };
+          }
+        } catch (error) {
+          console.error('Error en servicio de autenticación:', error);
+          return { 
+            success: false, 
+            message: 'Error de conexión con el servidor' 
+          };
+        }
+      },
 
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      setToken(token) {
+        localStorage.setItem(this.tokenKey, token);
+      },
+
+      getToken() {
+        return localStorage.getItem(this.tokenKey);
+      },
+
+      // Guarda los datos del usuario en localStorage
+      setUser(user) {
+        localStorage.setItem(this.userKey, JSON.stringify(user));
+      },
+
+      getUser() {
+        const userData = localStorage.getItem(this.userKey);
+        return userData ? JSON.parse(userData) : null;
+      },
+
+      isAuthenticated() {
+        return !!this.getToken();
+      },
+
+      logout() {
+        localStorage.removeItem(this.tokenKey);
+        localStorage.removeItem(this.userKey);
+      },
+
+      async checkStatus() {
+        try {
+          const token = this.getToken();
+          
+          if (!token) {
+            return { success: false, message: 'No hay sesión activa' };
+          }
+
+          const response = await fetch(`${this.apiUrl}/check-status`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          const data = await response.json();
+          
+          if (response.ok && data.data) {
+            return { success: true, data: data.data };
+          } else {
+            this.logout(); 
+            return { success: false, message: data.message || 'Sesión inválida' };
+          }
+        } catch (error) {
+          console.error('Error verificando estado de sesión:', error);
+          return { success: false, message: 'Error de conexión con el servidor' };
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const form = document.getElementById('loginForm');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const rememberMeCheckbox = document.getElementById('rememberMe');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const buttonText = document.getElementById('buttonText');
+      const spinner = document.getElementById('spinner');
+      const messageDiv = document.getElementById('message');
+
+      // Verificar si hay una sesión guardada
+      checkSavedSession();
+      
+      // Verificar si hay credenciales guardadas (Remember me)
+      checkRememberedCredentials();
+
+      // Evento de envío del formulario
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleLogin();
       });
 
-      const data = await res.json();
+      // Validación en tiempo real
+      emailInput.addEventListener('input', validateEmail);
+      passwordInput.addEventListener('input', validatePassword);
 
-      if (res.ok && data.data && data.data.token) {
-        localStorage.setItem("token", data.data.token); 
-        msg.textContent = "✅ Login exitoso. Redirigiendo...";
-        msg.style.color = "green";
-        setTimeout(() => {
-          window.location.href = "home.html";
-        }, 1500);
-      } else {
-        msg.textContent = data.message || "❌ Credenciales inválidas";
-        msg.style.color = "red";
+      // Verificar si existe una sesión activa
+      async function checkSavedSession() {
+        // Si ya hay un token en localStorage, verificar si sigue siendo válido
+        if (AuthService.isAuthenticated()) {
+          const statusCheck = await AuthService.checkStatus();
+          if (statusCheck.success) {
+            // Sesión válida, redirigir a la página principal
+            window.location.href = 'home.html';
+          }
+        }
       }
-    } catch (error) {
-      msg.textContent = "❌ Error de conexión con el servidor";
-      msg.style.color = "red";
-    }
-  });
-</script>
+
+      // Verificar si hay credenciales guardadas para recordar
+      function checkRememberedCredentials() {
+        // Verificar si existen credenciales guardadas
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+          emailInput.value = savedEmail;
+          rememberMeCheckbox.checked = true;
+        }
+      }
+
+      function validateEmail() {
+        const email = emailInput.value.trim();
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        
+        if (!isValid && email !== '') {
+          emailInput.classList.add('is-invalid');
+          return false;
+        } else {
+          emailInput.classList.remove('is-invalid');
+          if (email !== '') {
+            emailInput.classList.add('is-valid');
+          }
+          return true;
+        }
+      }
+
+      function validatePassword() {
+        const password = passwordInput.value;
+        
+        if (password.length < 1) {
+          passwordInput.classList.add('is-invalid');
+          return false;
+        } else {
+          passwordInput.classList.remove('is-invalid');
+          passwordInput.classList.add('is-valid');
+          return true;
+        }
+      }
+
+      function validateForm() {
+        const emailValid = validateEmail();
+        const passwordValid = validatePassword();
+        return emailValid && passwordValid;
+      }
+
+      async function handleLogin() {
+        if (!validateForm()) {
+          return;
+        }
+
+        const credentials = {
+          email: emailInput.value.trim(),
+          password: passwordInput.value
+        };
+
+        setLoading(true);
+        showMessage('', '');
+
+        try {
+ 
+          const result = await AuthService.login(credentials);
+
+          if (result.success) {
+            if (rememberMeCheckbox.checked) {
+              localStorage.setItem('rememberedEmail', credentials.email);
+            } else {
+              localStorage.removeItem('rememberedEmail');
+            }
+            showMessage('✅ Login exitoso. Redirigiendo...', 'success');
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 1500);
+          } else {
+            // Mostrar mensaje de error
+            showMessage(`❌ ${result.message}`, 'danger');
+          }
+        } catch (error) {
+          console.error('Error en login:', error);
+          showMessage('❌ Error inesperado. Por favor, intente de nuevo.', 'danger');
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function showMessage(text, type) {
+        messageDiv.textContent = text;
+
+        messageDiv.className = '';
+        
+        if (type) {
+          messageDiv.classList.add(`text-${type}`, 'fw-bold', 'mt-3');
+        }
+      }
+
+      function setLoading(isLoading) {
+        if (isLoading) {
+          spinner.style.display = 'inline-block';
+          buttonText.textContent = 'Iniciando sesión...';
+          submitButton.disabled = true;
+        } else {
+          spinner.style.display = 'none';
+          buttonText.textContent = 'Iniciar sesión';
+          submitButton.disabled = false;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

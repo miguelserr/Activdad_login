@@ -14,28 +14,27 @@ const errorHandler = require("../middlewares/errorHandler");
 
 const app = express();
 
-//middlewares
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//configuracion
 app.set("port", config.app.port);
 
-//rutas
 app.use("/api/roles", roles);
 app.use("/api/users", users);
 app.use("/api/posts", posts);
 app.use("/api/likes", likes);
 app.use("/api/comments", comments);
 app.use("/api/auth", auth);
+
+app.use("/", express.static(path.join(__dirname, "../../FRONTED")));
+
+app.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
+
+// Middleware de errores
 app.use(errorHandler);
 
-// public static files
-app.use(express.static(path.join(__dirname, "../../uploads")));
-
-//endpoint not found
 app.use((req, res, next) => {
   res.status(404).json({
     message: "Endpoint not found",
